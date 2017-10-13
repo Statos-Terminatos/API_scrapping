@@ -2,6 +2,7 @@
 import requests 
 import requests.auth
 from authorization_details import * 
+import json
 
 client_auth = requests.auth.HTTPBasicAuth(token, secret)
 post_data = {"grant_type": "password", "username":username, "password":password}
@@ -28,7 +29,7 @@ for article in all_articles:
     new_data["votes"] = temp["ups"]
     ids.append(new_data)
 
-print(ids) 
+#print(ids) 
 
 #loop to find the unique most upvoted article
 most_pop_id = ""
@@ -40,4 +41,22 @@ for article in all_articles:
         most_pop_id = temp["id"]
         nb_votes = temp["ups"]
 
-print(most_pop_id, ":", nb_votes)
+print("Most popular article id is: ", most_pop_id, "with total number of votes", nb_votes)
+
+reponse_comments = requests.get("https://oauth.reddit.com/r/python/comments/75ia74",
+                                 headers = headers, params = params)
+all_comments = reponse_comments.json()
+
+comment_content = ""
+comment_id = ""
+comment_votes = 0
+
+comments_list = all_comments[1]["data"]["children"]
+for comment in comments_list:
+    temp = comment["data"] 
+    if temp["ups"] >= comment_votes:
+        comment_id = temp["id"]
+        comment_votes = temp["ups"]
+        comment_content = temp["body"]
+
+print(comment_content, comment_id, comment_votes)
